@@ -51,7 +51,8 @@
   */
  function createTimer($id, $projectId, $userId, $comment) {
     if (!DB::query("INSERT INTO time (id, project_id, user_id, comment, time_started) VALUES (:id, :projectId, :userId, :comment, :timeStarted)", array(':id'=>$id, ':projectId'=>$projectId, ':userId'=>$userId, ':comment'=>$comment, ':timeStarted'=>time()))) {
-        throw new TimerCreateException('Could not create the timer.');
+        // throw new TimerCreateException('Could not create the timer.');
+        trigger_error('Could not create the timer.', E_USER_ERROR);
     }
  }
 ?>
