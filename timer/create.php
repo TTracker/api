@@ -1,7 +1,6 @@
 <?php
 
-require_once '../utils/DB.php';
-require_once '../utils/token.php';
+require_once '../utils/timer_fns.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
@@ -13,21 +12,20 @@ if (Token::check(Token::getFromHeaders())) {
 
         if (!isset($data->comment)) {
             http_response_code(400);
-            die(json_encode(array('error' => 'Please fill out both the comment, projectId.')));
+            die(trigger_error('Please enter the comment', E_USER_WARNING));
         }
 
         $token = Token::getFromHeaders();
-    
+
         @$last_tid = DB::query("SELECT * FROM time ORDER BY id DESC LIMIT 1")[0]['id'];
         @$new_tid = $last_tid + 1;
 
-        DB::query("INSERT INTO time (id, project_id, user_id, comment, time_started) VALUES (:tid, :pid, :uid, :comment, :timeS)", array(':tid'=>$new_tid, ':pid'=>htmlentities($data->pid), ':uid'=>Token::getUserId($token), ':comment'=>htmlentities($data->comment), ':timeS'=>time()));
+        createTimer($new_tid, isset($data->projectId) ? htmlspecialchars($data->projectId) : NULL, Token::getUserId($token), htmlspecialchars($data->comment));
 
-    
         echo json_encode(array('success' => 'Timer has been created!'));
     }
 } else {
-    echo json_encode(array('error' => 'Access denied'));
+    trigger_error('Access denied', E_USER_WARNING);
     http_response_code(401);
 }
 

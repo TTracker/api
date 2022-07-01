@@ -1,46 +1,35 @@
 <?php
 
-require_once '../utils/DB.php';
-require_once '../utils/token.php';
+require_once '../utils/timer_fns.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 
-if (Token::check(Token::getFromHeaders())) {
+if (Token::check($token = Token::getFromHeaders())) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // get posted data
         $data = json_decode(file_get_contents("php://input", true));
 
-        if (!isset($data->tid)) {
+        if (!isset($data->timerId)) {
             http_response_code(400);
-            die(json_encode(array('error' => 'Please fill out the timerId.')));
+            die(trigger_error('Please fill out the timerId', E_USER_WARNING));
         }
-
-        $token = Token::getFromHeaders();
-        if (DB::query("SELECT * FROM time WHERE id=:tid AND user_id=:uid LIMIT 1", array(':tid'=>htmlentities($data->tid), ':uid'=>Token::getUserId(Token::getFromHeaders()))) != null) {
-            if (DB::query("SELECT * FROM time WHERE id = :tid ORDER BY time_started DESC LIMIT 1", array(':tid' => htmlentities($data->tid)))[0]['time_ended'] == null) {
-                $ts = DB::query("SELECT * FROM time WHERE id = :tid ORDER BY time_started DESC LIMIT 1", array(':tid' => htmlentities($data->tid)))[0]['time_started'];
-                DB::query("UPDATE time SET time_ended = :now, length = :diff WHERE id = :tid ORDER BY time_started DESC LIMIT 1", array(':now' => time(), ':diff' => time() - $ts, ':tid' => htmlentities($data->tid)));
-
-                // echo $new_len;
-                // DB::query("UPDATE time SET length = :len, paused? = :pause WHERE id = :tid", array(':len' => $new_len, ':pause'=> '1', ':tid' => htmlentities($data->tid)));
-                // DB::query("UPDATE time SET paused? = 1 WHERE id = :tid", array(':tid' => htmlentities($data->tid)));
+        if (DB::query("SELECT * FROM time WHERE id=:timerId AND user_id=:userId LIMIT 1", array(':timerId'=>htmlspecialchars($data->timerId), ':userId'=>Token::getUserId($token))) != null) {
+            if (DB::query("SELECT * FROM time WHERE id = :timerId ORDER BY time_started DESC LIMIT 1", array(':timerId' => htmlspecialchars($data->timerId)))[0]['time_ended'] == null) {
+                pauseTimer((int) htmlspecialchars($data->timerId));
 
                 echo json_encode(array('success' => 'Timer has been paused!'));
             } else {
-                echo json_encode(array('error' => 'Timer is already paused'));
+                trigger_error('Timer is already paused', E_USER_NOTICE);
                 http_response_code(418);
             }
         } else {
-            echo json_encode(array('error' => 'Timer does not exist'));
+            trigger_error('Timer does not exist', E_USER_WARNING);
             http_response_code(404);
         }
-
-        // DB::query("INSERT INTO time (user_id, project_id, comment, time_started) VALUES (:uid, :pid, :comment, :timeS)", array(':uid'=>Token::getUserId($token), ':pid'=>htmlentities($data->pid), ':comment'=>htmlentities($data->comment), ':timeS'=>htmlentities($data->timeStarted)));
-        // DB::query("UPDATE time SET time ");
     }
 } else {
-    echo json_encode(array('error' => 'Access denied'));
+    trigger_error('Access denied', E_USER_WARNING);
     http_response_code(401);
 }
 
