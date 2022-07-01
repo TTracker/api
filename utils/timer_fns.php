@@ -51,10 +51,10 @@ include 'token_fns.php';
  */
 function createTimer($id, $projectId, $userId, $comment)
 {
-    if (!DB::query("INSERT INTO time (id, project_id, user_id, comment, time_started) VALUES (:id, :projectId, :userId, :comment, :timeStarted)", array(':id' => $id, ':projectId' => $projectId, ':userId' => $userId, ':comment' => $comment, ':timeStarted' => time()))) {
+    DB::query("INSERT INTO time (id, project_id, user_id, comment, time_started) VALUES (:id, :projectId, :userId, :comment, :timeStarted)", array(':id' => $id, ':projectId' => $projectId, ':userId' => $userId, ':comment' => $comment, ':timeStarted' => time()));
         // throw new TimerCreateException('Could not create the timer.');
-        trigger_error('Could not create the timer.', E_USER_ERROR);
-    }
+        // die(trigger_error('Could not create the timer.', E_USER_ERROR));
+    
 }
 
 /**
@@ -67,26 +67,20 @@ function createTimer($id, $projectId, $userId, $comment)
  */
 function editTimerComment($id, $comment)
 {
-    if (!DB::query("UPDATE time SET comment = :value WHERE id=:id ORDER BY time_started DESC LIMIT 1", array(':value' => $comment, ':id' => $id))) {
-        // throw new TimerCreateException('Could not create the timer.');
-        trigger_error('Could not edit the timer.', E_USER_ERROR);
-    }
+    DB::query("UPDATE time SET comment = :value WHERE id=:id ORDER BY time_started DESC LIMIT 1", array(':value' => $comment, ':id' => $id));
 }
 
 /**
  * Edits a timer's tag
  * 
- * @param integer $id   ID of the timer
- * @param string  $tag  New Tag
+ * @param integer $id     ID of the timer
+ * @param integer $tagId  New Tag
  * 
  * @author Adam Ondrejčák <adam.ondrejcak@gmail.com>
  */
 function editTimerTag($id, $tagId)
 {
-    if (!DB::query("UPDATE time SET tag = :tagId WHERE id=:id ORDER BY time_started DESC LIMIT 1", array(':tagId' => $tagId, ':id' => $id))) {
-        // throw new TimerCreateException('Could not create the timer.');
-        trigger_error('Could not edit the timer.', E_USER_ERROR);
-    }
+    DB::query("UPDATE time SET tag_id = :tagId WHERE id=:id ORDER BY time_started DESC LIMIT 1", array(':tagId' => $tagId, ':id' => $id));
 }
 
 /**
@@ -98,11 +92,8 @@ function editTimerTag($id, $tagId)
  */
 function pauseTimer($id)
 {
-    $timeStarted = DB::query("SELECT * FROM time WHERE id = :id ORDER BY time_started DESC LIMIT 1", array(':tid' => $id))[0]['time_started'];
-    if (!DB::query("UPDATE time SET time_ended = :now, length = :diff WHERE id = :id ORDER BY time_started DESC LIMIT 1", array(':now' => time(), ':diff' => time() - $timeStarted, ':id' => $id))) {
-        // throw new TimerCreateException('Could not create the timer.');
-        trigger_error('Could not pause the timer.', E_USER_ERROR);
-    }
+    $timeStarted = DB::query("SELECT * FROM time WHERE id = :id ORDER BY time_started DESC LIMIT 1", array(':id' => $id))[0]['time_started'];
+    DB::query("UPDATE time SET time_ended = :now, length = :diff WHERE id = :id ORDER BY time_started DESC LIMIT 1", array(':now' => time(), ':diff' => time() - $timeStarted, ':id' => $id));
 }
 
 /**
@@ -116,9 +107,7 @@ function pauseTimer($id)
 function resumeTimer($id, $userId)
 {
     $projectId = DB::query("SELECT * FROM time WHERE id=:id LIMIT 1", array(':id' => $id))[0]['project_id'];
-    $comment = DB::query("SELECT * FROM time WHERE id=:id LIMIT 1", array(':tid' => $id))[0]['comment'];
-    if (!DB::query("INSERT INTO time (id, user_id, project_id, comment, time_started) VALUES (:id, :userId, :projectId, :comment, :timeStarted)", array(':id' => $id, ':userId' => $userId, ':projectId' => $projectId, ':comment' => $comment, ':timeStarted' => time()))) {
-        // throw new TimerCreateException('Could not create the timer.');
-        trigger_error('Could not resume the timer.', E_USER_ERROR);
-    }
+    $tagId = DB::query("SELECT * FROM time WHERE id=:id ORDER BY time_started DESC LIMIT 1", array(':id' => $id))[0]['tag_id'];
+    $comment = DB::query("SELECT * FROM time WHERE id=:id LIMIT 1", array(':id' => $id))[0]['comment'];
+    DB::query("INSERT INTO time (id, user_id, project_id, tag_id, comment, time_started) VALUES (:id, :userId, :projectId, :tagId, :comment, :timeStarted)", array(':id' => $id, ':userId' => $userId, ':projectId' => $projectId, ':tagId'=>$tagId, ':comment' => $comment, ':timeStarted' => time()));
 }
