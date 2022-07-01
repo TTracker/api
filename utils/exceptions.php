@@ -15,6 +15,7 @@
   * @license    http://www.gnu.org/licenses/gpl-3.0.html  GNU GPL v3
   * @version    prerelease-1.0
   * @since      File available since alpha-2.1.0
+  * @deprecated File deprecated since alpha-2.1.1
   */
 
  
@@ -28,6 +29,7 @@
   * @license    http://www.gnu.org/licenses/gpl-3.0.html  GNU GPL v3
   * @version    prerelease-1.0
   * @since      Class available since alpha-2.1.0
+  * @deprecated Class deprecated since alpha-2.1.1
   */
  class TimerCreateException extends Exception {
     function __toString() {
