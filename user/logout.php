@@ -1,7 +1,6 @@
 <?php
 
-require_once '../utils/DB.php';
-require_once '../utils/token.php';
+require_once '../utils/timer_fns.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
