@@ -46,7 +46,6 @@ include 'token_fns.php';
  * @param integer $userId     ID of the user
  * @param string  $comment    Comment of the timer
  * 
- * @throws TimerCreateException
  * @author Adam Ondrejčák <adam.ondrejcak@gmail.com>
  */
 function createTimer($id, $projectId, $userId, $comment)
