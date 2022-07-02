@@ -15,6 +15,7 @@
   * @license    http://www.gnu.org/licenses/gpl-3.0.html  GNU GPL v3
   * @version    prerelease-1.0
   * @since      File available since alpha-2.1.1
+  * @deprecated File deprecated since beta-1.0
   */
 
   /**
@@ -26,6 +27,9 @@
    * @param string $eline  Line where the error occurred
    * 
    * @author Adam Ondrejčák <adam.ondrejcak@gmail.com>
+   * 
+   * @since       Function available since alpha-2.1.1
+   * @deprecated  Function deprecated since beta-1.0
    */
   function error_handler($etype, $emsg, $efile, $eline) {
 
